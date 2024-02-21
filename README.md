@@ -56,6 +56,19 @@ GoogLeNet, MobileNetV2, SVC, and Gradient Boosted Decision Tree techniques maint
 
 ![노이즈2](https://github.com/jpangece/Anti_Drone_System/assets/122253772/6452d63b-66d3-40a6-83be-84a95ae7c4c1)
 
+## **CONCLUSION**
+### Performance Centered 
+GoogLeNet is suitable for performance-driven tasks with high accuracy and moderate inference speed
+
+### velocity center
+Since the Gradient Boosted Decision Tree shows good performance on the CPU, it is suitable for real-time or high throughput needs and limited hardware environments.
+
+### Considering complex requirements
+Considering all the accuracy, speed, and model size, GoogLeNet and SqueezeNet1.1 provide balanced performance.
+
+![image](https://github.com/jpangece/Anti_Drone_System/assets/122253772/a99fd344-3edd-40c2-81ae-18354168bf66)
+
+
 ## **IMPORTANCE**
 
 - With Micro Dopper Signature data, it is possible to obtain more information while being economical in H/W without expensive high-performance cameras.
