@@ -1,4 +1,4 @@
-# Anti Drone System Through Machine & Deep Learning
+# Anti Drone System Through Machine & Deep Learning (2023)
 
 The extraction of a cost-effective and high-performance model capable of accurately distinguishing drones from non-drone objects. To ensure a comprehensive evaluation, Simulated noise with different variances to low-quality drone pictures within the FMCW datasets. As a result, GoogLeNet, MobileNetV2, SVC, and GBDT techniques maintained accuracy above 0.9 until a noise distribution of 1e-3. Notably, MobileNetV2 and Linear SVC exhibited the highest performance.
 
