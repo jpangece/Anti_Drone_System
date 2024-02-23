@@ -59,7 +59,25 @@ def collate_fn(examples):
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
   ])
   concat = lambda x : np.concatenate([x,x,x], axis=2)
-  pixel_values = torch.tensor(np.array([np.array(normalize(concat(np.expand_dims(np.array(Image.fromarray(np.array(example["image"])).resize((224,224))),axis=2)))) for example in examples])).float()
+  pixel_values = torch.tensor(
+    np.array([
+        np.array(
+            normalize(
+                concat(
+                    np.expand_dims(
+                        np.array(
+                            Image.fromarray(
+                                np.array(example["image"])
+                            ).resize((224, 224))
+                        ),
+                        axis=2
+                    )
+                )
+            )
+        )
+        for example in examples
+    ])
+).float()
   labels = torch.tensor([example["label"] for example in examples])
   return {"x": pixel_values, "labels": labels}
 
