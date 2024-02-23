@@ -124,7 +124,13 @@ def run(seed):
     # Initialize WandB
     wandb.init(
         project=f"RCS_ResNet101",
-        name=f"{datetime.now().strftime('%b-%d %H:%M')} lr:{training_args.learning_rate:1.0e} batch_size:{training_args.per_device_train_batch_size} epoch:{training_args.num_train_epochs}",
+        name = (
+    f"{datetime.now().strftime('%b-%d %H:%M')} "
+    f"lr:{training_args.learning_rate:1.0e} "
+    f"batch_size:{training_args.per_device_train_batch_size} "
+    f"epoch:{training_args.num_train_epochs}"
+    )
+
         config=training_args
     )
 
