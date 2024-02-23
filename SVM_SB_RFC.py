@@ -194,7 +194,11 @@ for name, model in models.items():
     end = perf_counter()
     inference_time.append(end-start)
   predictions = np.array(predictions)
-  test_results[name] = {"accuracy": compute_metrics((predictions,Y_test))["accuracy"], "mean": np.mean(inference_time), "std":np.std(inference_time)}
+  test_results[name] = {
+    "accuracy": compute_metrics((predictions, Y_test))["accuracy"],
+    "mean": np.mean(inference_time),
+    "std": np.std(inference_time)
+  }
   print(f"results of {name}: {test_results[name]}")
 
 def flatten(example):
