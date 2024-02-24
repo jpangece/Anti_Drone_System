@@ -62,7 +62,8 @@ def collate_fn(examples):
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
   ])
   concat = lambda x : np.concatenate([x,x,x], axis=2)
-  pixel_values = torch.tensor(
+  pixel_values = torch.tensor
+  (
     np.array([
         np.array(
             normalize(
@@ -80,7 +81,7 @@ def collate_fn(examples):
         )
         for example in examples
     ])
-).float()
+  ).float()
   labels = torch.tensor([example["label"] for example in examples])
   return {"x": pixel_values, "labels": labels}
 
@@ -92,6 +93,7 @@ from transformers import PreTrainedModel, PretrainedConfig
 class GoogLeNetConfig(PretrainedConfig):
   def __init__(self,**kwargs):
     super().__init__(**kwargs)
+
 
 class GoogLeNet(PreTrainedModel):
   def __init__(self, model, config):
@@ -123,7 +125,7 @@ def run(seed):
 
   from transformers import TrainingArguments
   training_args = TrainingArguments(
-      output_dir='./drive/MyDrive/FMCW/AlexNet/results',          # output directory
+      output_dir='./drive/MyDrive/FMCW/AlexNet/results',  # output directory
       num_train_epochs=12,              # total number of training epochs
       learning_rate=1e-3,
       per_device_train_batch_size=128,   # batch size per device during training
@@ -141,13 +143,10 @@ def run(seed):
       seed=seed,                           # Seed for experiment reproducibility
       remove_unused_columns=False,
       report_to="wandb",
-      # load_best_model_at_end=True,
-      # metric_for_best_model=metric_name,
   )
 
   from datetime import datetime
   wandb.init(
-      # set the wandb project where this run will be logged
       project=f"FMCW_AlexNet",
       name = (
     f"{datetime.now().strftime('%b-%d %H:%M')} "
@@ -155,10 +154,7 @@ def run(seed):
     f"batch_size:{training_args.per_device_train_batch_size} "
     f"epoch:{training_args.num_train_epochs}"
     )
-
-
-      # track hyperparameters and run metadata
-      config=training_args
+  config=training_args
   )
 
   from transformers import Trainer
