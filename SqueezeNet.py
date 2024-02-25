@@ -19,7 +19,11 @@ full_dataset = load_dataset("Goorm-AI-04/Drone_Doppler")
 test_dataset = full_dataset["test"]
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"], test_size=0.1, stratify=full_dataset["train"]["label"])
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"],
+    test_size=0.1,
+    stratify=full_dataset["train"]["label"]
+)
 
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
@@ -29,12 +33,21 @@ class_set = set(train_dataset["type"])
 id2label = {id:label for id, label in enumerate(class_set)}
 label2id = {label:id for id, label in id2label.items()}
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_recall_fscore_support,
+    roc_auc_score
+)
 
 def compute_metrics(pred):
   labels = pred.label_ids
   preds = pred.predictions.argmax(-1)
-  precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='micro')
+  precision, recall, f1, _ = precision_recall_fscore_support(
+      labels, 
+      preds, 
+      average='micro'
+  )
+
   acc = accuracy_score(labels, preds)
   return {
       'accuracy': acc,
@@ -56,7 +69,10 @@ def collate_fn(examples):
   from PIL import Image
   normalize = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    transforms.Normalize(
+        mean=[0.485, 0.456, 0.406],
+        std=[0.229, 0.224, 0.225]
+    )
   ])
   concat = lambda x : np.concatenate([x,x,x], axis=2)
   pixel_values = torch.tensor(
@@ -122,25 +138,23 @@ def run(seed):
   from transformers import TrainingArguments
   training_args = TrainingArguments(
       output_dir='./drive/MyDrive/FMCW/SqueezeNet/results',          # output directory
-      num_train_epochs=8,              # total number of training epochs
+      num_train_epochs=8,  # total number of training epochs
       learning_rate=1e-2,
-      per_device_train_batch_size=128,   # batch size per device during training
-      per_device_eval_batch_size=20,   # batch size for evaluation
-      warmup_steps=16,               # number of warmup steps for learning rate scheduler
-      weight_decay=0.001,               # strength of weight decay
-      logging_dir='./drive/MyDrive/FMCW/SqueezeNet/logs',            # directory for storing logs
-      logging_steps=4,               # How often to print logs
-      do_train=True,                   # Perform training
-      do_eval=True,                    # Perform evaluation
-      evaluation_strategy="epoch",     # evalute after eachh epoch
+      per_device_train_batch_size=128, # batch size per device during training
+      per_device_eval_batch_size=20, # batch size for evaluation
+      warmup_steps=16,  # number of warmup steps for learning rate scheduler
+      weight_decay=0.001,  # strength of weight decay
+      logging_dir='./drive/MyDrive/FMCW/SqueezeNet/logs',  # directory for storing logs
+      logging_steps=4,  # How often to print logs
+      do_train=True,  # Perform training
+      do_eval=True,  # Perform evaluation
+      evaluation_strategy="epoch",  # evalute after eachh epoch
       gradient_accumulation_steps=1,  # total number of steps before back propagation
-      fp16=True,                       # Use mixed precision
-      run_name="FMCW_SqueezeNet",       # experiment name
-      seed=seed,                           # Seed for experiment reproducibility
+      fp16=True,  # Use mixed precision
+      run_name="FMCW_SqueezeNet",  # experiment name
+      seed=seed,  # Seed for experiment reproducibility
       remove_unused_columns=False,
       report_to="wandb",
-      # load_best_model_at_end=True,
-      # metric_for_best_model=metric_name,
   )
 
   from datetime import datetime
@@ -148,14 +162,11 @@ def run(seed):
       # set the wandb project where this run will be logged
       project=f"FMCW_SqueezeNet",
       name = (
-    f"{datetime.now().strftime('%b-%d %H:%M')} "
-    f"lr:{training_args.learning_rate:1.0e} "
-    f"batch_size:{training_args.per_device_train_batch_size} "
-    f"epoch:{training_args.num_train_epochs}"
-  )
-
-
-      # track hyperparameters and run metadata
+          f"{datetime.now().strftime('%b-%d %H:%M')} "
+          f"lr:{training_args.learning_rate:1.0e} "
+          f"batch_size:{training_args.per_device_train_batch_size} "
+          f"epoch:{training_args.num_train_epochs}"
+      )
       config=training_args
   )
 
@@ -169,13 +180,9 @@ def run(seed):
       compute_metrics=compute_metrics,
       data_collator=collate_fn
   )
-
   trainer.train()
-
   return trainer, model
 
 end_trainer, end_model = run(seed)
-
 wandb.finish()
-
 end_trainer.predict(test_dataset).metrics
