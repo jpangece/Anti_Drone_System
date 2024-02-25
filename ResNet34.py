@@ -92,16 +92,10 @@ from transformers import AutoFeatureExtractor
 feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-34")
 
 def collate_fn(examples):
-  concat = lambda x : np.concatenate([x,x,x], axis=2)
-  add_noise = lambda x: x + np.random.normal(0,np.sqrt(0.1),x.shape)  # adding noise
+  concat = lambda x: np.concatenate([x, x, x], axis=2)
+  add_noise = lambda x: x + np.random.normal(0, np.sqrt(0.1), x.shape)  # adding noise
   images = [
-      floor(
-          ceiling(
-              add_noise(
-                  np.array(example["rcs_image"])
-              )
-          )
-      )
+      floor(ceiling(add_noise(np.array(example["rcs_image"]))))
       for example in examples
   ]
   pixel_values = feature_extractor(
@@ -168,8 +162,8 @@ from transformers import AutoFeatureExtractor
 feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-34")
 
 def collate_fn(examples):
-  concat = lambda x : np.concatenate([x,x,x], axis=2)
-  add_noise = lambda x: x + np.random.normal(0,np.sqrt(0.1),x.shape)
+  concat = lambda x: np.concatenate([x, x, x], axis=2)
+  add_noise = lambda x: x + np.random.normal(0, np.sqrt(0.1), x.shape)  # adding noise
   images = [
       floor(ceiling(add_noise(np.array(example["rcs_image"]))))
       for example in examples
