@@ -8,7 +8,11 @@
 
 from datasets import load_dataset, Dataset
 from sklearn.model_selection import train_test_split
-from transformers import AutoFeatureExtractor, ResNetForImageClassification, TrainingArguments, Trainer, set_seed
+from transformers import (AutoFeatureExtractor, 
+                          ResNetForImageClassification, 
+                          TrainingArguments, 
+                          Trainer, 
+                          set_seed)
 import torch
 import torch.nn as nn
 import numpy as np
@@ -73,9 +77,17 @@ feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-101")
 def collate_fn(examples):
     concat = lambda x: np.concatenate([x, x, x], axis=2)
     add_noise = lambda x: x + np.random.normal(0, np.sqrt(0.1), x.shape)
-    images = [floor(ceiling(add_noise(np.array(example["rcs_image"])))) for example in examples]
-    pixel_values = feature_extractor([concat(np.expand_dims(image, axis=2)) for image in images], do_rescale=False)
-    pixel_values = torch.tensor(np.array(pixel_values["pixel_values"]))
+    images = [
+        floor(ceiling(add_noise(np.array(example["rcs_image"]))))
+        for example in examples
+    ]
+    pixel_values = feature_extractor([
+        concat(np.expand_dims(image, axis=2)) 
+        for image in images
+    ], do_rescale=False)
+    pixel_values = torch.tensor(
+        np.array(pixel_values["pixel_values"])
+    )
     labels = torch.tensor([example["label"] for example in examples])
     return {"pixel_values": pixel_values, "labels": labels}
 
