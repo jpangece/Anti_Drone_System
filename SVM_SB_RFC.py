@@ -67,7 +67,6 @@ from sklearn import svm
 X = [extract_features(image) for image in train_dataset["rcs_image"]]
 Y = train_dataset["label"]
 clf = svm.LinearSVC()
-# clf = svm.SVC(decision_function_shape='ovo')
 clf.fit(X, Y)
 
 X_val = [extract_features(image) for image in eval_dataset["rcs_image"]]
