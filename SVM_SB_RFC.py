@@ -1,15 +1,11 @@
+# Original code was written on Google Colab 
 !pip install transformers -q
 !pip install datasets -q
 !pip install accelerate -U -q
-# !pip install wandb -q
-# !huggingface-cli login
-# !wandb login
-#!huggingface-cli whoami
 
 from transformers import set_seed
 import torch
 import numpy as np
-
 seed = 42
 set_seed(seed)
 
@@ -17,7 +13,6 @@ from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc
 
 def compute_metrics(pred):
   preds, labels = pred
-
   precision, recall, f1, _ = precision_recall_fscore_support(labels, preds, average='micro')
   acc = accuracy_score(labels, preds)
   return {
@@ -52,8 +47,11 @@ full_dataset = load_dataset("Goorm-AI-04/RCS_Image_Stratified_Train_Test")
 test_dataset = full_dataset["test"]
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"], test_size=0.1, stratify=full_dataset["train"]["drone_type"])
-
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"],
+    test_size=0.1,
+    stratify=full_dataset["train"]["drone_type"]
+)
 drone_set = set(train_dataset["drone_type"])
 id2label = {id:label for id, label in enumerate(drone_set)}
 label2id = {label:id for id, label in id2label.items()}
@@ -120,14 +118,17 @@ def flatten(example):
   return example
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"].map(flatten, num_proc=4), test_size=0.1, stratify=full_dataset["train"]["label"], random_state=seed)
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"].map(flatten, num_proc=4),
+    test_size=0.1,
+    stratify=full_dataset["train"]["label"],
+    random_state=seed
+)
 
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
 eval_dataset = Dataset.from_dict(eval_dataset)
-
 test_dataset = full_dataset["test"].map(flatten, num_proc=4)
-
 class_set = set(train_dataset["type"])
 id2label = {id:label for id, label in enumerate(class_set)}
 label2id = {label:id for id, label in id2label.items()}
@@ -177,7 +178,6 @@ for name, model in models.items():
   print(f"results of {name}: {results[name]} / time for inference: {end-start}")
 
 best_models = {}
-# best_models["SVC"] = models["SVC"]
 best_models["LinearSVC"] = models["LinearSVC"]
 best_models["HistGradientBoostingClassifier"] = models["HistGradientBoostingClassifier"]
 best_models["RandomForestClassifier"] = models["RandomForestClassifier"]
@@ -202,15 +202,28 @@ for name, model in models.items():
   print(f"results of {name}: {test_results[name]}")
 
 def flatten(example):
-  keys = ("image", "noise_var_0.0001", "noise_var_0.0005", "noise_var_0.001", "noise_var_0.005", "noise_var_0.01")
+  keys = (
+      "image",
+      "noise_var_0.0001",
+      "noise_var_0.0005",
+      "noise_var_0.001",
+      "noise_var_0.005",
+      "noise_var_0.01"
+  )
   for key in keys:
     example[key] = np.array(example[key])[:,:,0].flatten()
   return example
 
 noise_dataset = load_dataset("Goorm-AI-04/Drone_Doppler_Noise")["train"].map(flatten, num_proc=4)
-
 Y_test = np.array(noise_dataset["label"])
-keys = ("image", "noise_var_0.0001", "noise_var_0.0005", "noise_var_0.001", "noise_var_0.005", "noise_var_0.01")
+keys = (
+    "image",
+    "noise_var_0.0001",
+    "noise_var_0.0005",
+    "noise_var_0.001",
+    "noise_var_0.005",
+    "noise_var_0.01"
+)
 test_results = {}
 for name, model in models.items():
   test_results[name] = {}
@@ -221,7 +234,10 @@ for name, model in models.items():
     end = perf_counter()
     inference_time = end-start
     predictions = np.array(predictions)
-    test_results[name][key] = {"accuracy": compute_metrics((predictions,Y_test))["accuracy"], "time": f"{inference_time/3497:1.3}"}
+    test_results[name][key] = {
+        "accuracy": compute_metrics((predictions, Y_test))["accuracy"],
+        "time": f"{inference_time / 3497:1.3}"
+    }
   print(f"results of {name}:")
   import json
   print(json.dumps(test_results[name],indent=4))
