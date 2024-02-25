@@ -226,14 +226,14 @@ def run(model_name, seed, noise, **kwargs):
   trainer.train()
   return trainer, model
 
-model_name = "resnet" # param {type:"string"}
-seed = 42 # param {type:"integer"}
-noise = None # param
-num_train_epochs = 4 # param {type:"integer"}
-learning_rate = 1e-2 # param
-per_device_train_batch_size = 128 # param {type:"integer"}
-warmup_steps = 16 # param {type:"integer"}
-weight_decay = 0.001 # param {type:"number"}
+model_name = "resnet"  # param {type:"string"}
+seed = 42  # param {type:"integer"}
+noise = None  # param
+num_train_epochs = 4  # param {type:"integer"}
+learning_rate = 1e-2  # param
+per_device_train_batch_size = 128  # param {type:"integer"}
+warmup_steps = 16  # param {type:"integer"}
+weight_decay = 0.001  # param {type:"number"}
 
 kwargs = {
     "num_train_epochs":num_train_epochs,
