@@ -150,32 +150,32 @@ def run(seed):
       config=training_args
   )
   
-    # Define trainer
-    trainer = Trainer(
-        model=model,
-        args=training_args,
-        train_dataset=train_dataset,
-        eval_dataset=eval_dataset,
-        compute_metrics=compute_metrics,
-        data_collator=collate_fn
-    )
+  # Define trainer
+  trainer = Trainer(
+      model=model,
+      args=training_args,
+      train_dataset=train_dataset,
+      eval_dataset=eval_dataset,
+      compute_metrics=compute_metrics,
+      data_collator=collate_fn
+  )
 
-    # Train the model
-    trainer.train()
+  # Train the model
+  trainer.train()
 
-    # Calculate metrics on the test dataset
-    test_results = trainer.predict(test_dataset)
+  # Calculate metrics on the test dataset
+  test_results = trainer.predict(test_dataset)
 
-    # Calculate additional metrics
-    test_metrics = compute_metrics(test_results)
+  # Calculate additional metrics
+  test_metrics = compute_metrics(test_results)
 
-    # Print or log the eval metrics
-    print("Eval Metrics:", trainer.evaluate())
+  # Print or log the eval metrics
+  print("Eval Metrics:", trainer.evaluate())
 
-    # Print or log the test metrics
-    print("Test Metrics:", test_metrics)
+  # Print or log the test metrics
+  print("Test Metrics:", test_metrics)
 
-    return trainer, model
+  return trainer, model
 
 # Run the training and evaluation
 end_trainer, end_model = run(seed)
