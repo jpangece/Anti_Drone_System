@@ -20,7 +20,11 @@ full_dataset = load_dataset("Goorm-AI-04/Drone_Doppler")
 test_dataset = full_dataset["test"]
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"], test_size=0.1, stratify=full_dataset["train"]["label"])
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"], 
+    test_size=0.1, 
+    stratify=full_dataset["train"]["drone_type"]
+)
 
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
@@ -30,7 +34,9 @@ class_set = set(train_dataset["type"])
 id2label = {id:label for id, label in enumerate(class_set)}
 label2id = {label:id for id, label in id2label.items()}
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import (accuracy_score,
+                             precision_recall_fscore_support,
+                             roc_auc_score)
 
 def compute_metrics(pred):
   labels = pred.label_ids
@@ -78,7 +84,8 @@ def collate_fn(examples):
         )
         for example in examples
     ])
-).float()
+  ).float()
+
   labels = torch.tensor([example["label"] for example in examples])
   return {"x": pixel_values, "labels": labels}
 
@@ -121,26 +128,24 @@ def run(seed):
 
   from transformers import TrainingArguments
   training_args = TrainingArguments(
-      output_dir='./drive/MyDrive/FMCW/GoogLeNet/results',          # output directory
-      num_train_epochs=8,              # total number of training epochs
+      output_dir='./drive/MyDrive/FMCW/GoogLeNet/results',  # output directory
+      num_train_epochs=8,  # total number of training epochs
       learning_rate=1e-2,
-      per_device_train_batch_size=128,   # batch size per device during training
-      per_device_eval_batch_size=20,   # batch size for evaluation
-      warmup_steps=16,               # number of warmup steps for learning rate scheduler
-      weight_decay=0.001,               # strength of weight decay
-      logging_dir='./drive/MyDrive/FMCW/GoogLeNet/logs',            # directory for storing logs
-      logging_steps=4,               # How often to print logs
-      do_train=True,                   # Perform training
-      do_eval=True,                    # Perform evaluation
-      evaluation_strategy="epoch",     # evalute after eachh epoch
+      per_device_train_batch_size=128, # batch size per device during training
+      per_device_eval_batch_size=20, # batch size for evaluation
+      warmup_steps=16,  # number of warmup steps for learning rate scheduler
+      weight_decay=0.001,  # strength of weight decay
+      logging_dir='./drive/MyDrive/FMCW/GoogLeNet/logs',  # directory for storing logs
+      logging_steps=4,  # How often to print logs
+      do_train=True,  # Perform training
+      do_eval=True,  # Perform evaluation
+      evaluation_strategy="epoch",  # evalute after eachh epoch
       gradient_accumulation_steps=1,  # total number of steps before back propagation
-      fp16=True,                       # Use mixed precision
-      run_name="FMCW_GoogLeNet",       # experiment name
-      seed=seed,                           # Seed for experiment reproducibility
+      fp16=True,  # Use mixed precision
+      run_name="FMCW_GoogLeNet",  # experiment name
+      seed=seed,  # Seed for experiment reproducibility
       remove_unused_columns=False,
       report_to="wandb",
-      # load_best_model_at_end=True,
-      # metric_for_best_model=metric_name,
   )
 
   from datetime import datetime
