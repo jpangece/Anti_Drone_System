@@ -76,26 +76,26 @@ def collate_fn(examples):
         std=[0.229, 0.224, 0.225]
     )
   ])
-  concat = lambda x : np.concatenate([x,x,x], axis=2)
+  concat = lambda x: np.concatenate([x, x, x], axis=2)
   pixel_values = torch.tensor(
-    np.array([
-        np.array(
-            normalize(
-                concat(
-                    np.expand_dims(
-                        np.array(
-                            Image.fromarray(
-                                np.array(example["image"])
-                            ).resize((224, 224))
-                        ),
-                        axis=2
-                    )
-                )
-            )
-        )
-        for example in examples
-    ])
-).float()
+      np.array([
+          np.array(
+              normalize(
+                  concat(
+                      np.expand_dims(
+                          np.array(
+                              Image.fromarray(
+                                  np.array(example["image"])
+                              ).resize((224, 224))
+                          ),
+                          axis=2
+                      )
+                  )
+              )
+          )
+          for example in examples
+      ])
+  ).float()
 
   labels = torch.tensor([example["label"] for example in examples])
   return {"x": pixel_values, "labels": labels}
@@ -163,12 +163,12 @@ def run(seed):
   wandb.init(
       # set the wandb project where this run will be logged
       project=f"FMCW_SqueezeNet",
-      name = (
+      name=(
           f"{datetime.now().strftime('%b-%d %H:%M')} "
           f"lr:{training_args.learning_rate:1.0e} "
           f"batch_size:{training_args.per_device_train_batch_size} "
           f"epoch:{training_args.num_train_epochs}"
-      )
+      ),
       config=training_args
   )
 
@@ -186,5 +186,6 @@ def run(seed):
   return trainer, model
 
 end_trainer, end_model = run(seed)
+
 wandb.finish()
 end_trainer.predict(test_dataset).metrics
