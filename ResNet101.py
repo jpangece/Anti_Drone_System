@@ -246,26 +246,26 @@ kwargs = {
 end_trainer, end_model = run(model_name, seed, noise, **kwargs)
 
 from transformers import TrainingArguments
-  training_args = TrainingArguments(
-      output_dir='./drive/MyDrive/RCS/ResNet/results',
-      num_train_epochs=4,
-      learning_rate=1e-2,
-      per_device_train_batch_size=128,
-      per_device_eval_batch_size=64,
-      warmup_steps=16,
-      weight_decay=0.01,
-      logging_dir='./drive/MyDrive/RCS/ResNet/logs',
-      logging_steps=16,
-      do_train=True,
-      do_eval=True,
-      evaluation_strategy="epoch",
-      gradient_accumulation_steps=1,
-      fp16=True,
-      run_name=f"Doppler_{model_name}",
-      seed=seed,
-      remove_unused_columns=False,
-      report_to="wandb",
-  )
+training_args = TrainingArguments(
+    output_dir='./drive/MyDrive/RCS/ResNet/results',
+    num_train_epochs=4,
+    learning_rate=1e-2,
+    per_device_train_batch_size=128,
+    per_device_eval_batch_size=64,
+    warmup_steps=16,
+    weight_decay=0.01,
+    logging_dir='./drive/MyDrive/RCS/ResNet/logs',
+    logging_steps=16,
+    do_train=True,
+    do_eval=True,
+    evaluation_strategy="epoch",
+    gradient_accumulation_steps=1,
+    fp16=True,
+    run_name=f"Doppler_{model_name}",
+    seed=seed,
+    remove_unused_columns=False,
+    report_to="wandb",
+)
 wandb.finish()
 
 end_trainer.predict(test_dataset).metrics
