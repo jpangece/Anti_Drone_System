@@ -1,4 +1,14 @@
 # Original code was written on Google Colab 
+# Install necessary packages
+!pip install transformers -q
+!pip install datasets -q
+!pip install accelerate -U -q
+!pip install wandb -q
+# Authenticate with Hugging Face and WandB
+!huggingface-cli whoami
+!wandb login
+!huggingface-cli login
+--------------------------------------------------------------------------------------------------------------------------
 # Standard library imports
 import numpy as np
 
@@ -7,20 +17,9 @@ import torch
 from transformers import set_seed
 import wandb
 
-# Install necessary packages
-!pip install transformers -q
-!pip install datasets -q
-!pip install accelerate -U -q
-!pip install wandb -q
-
-# Authenticate with Hugging Face and WandB
-!huggingface-cli whoami
-!wandb login
-!huggingface-cli login
-
 seed = 42
 set_seed(seed)
-
+--------------------------------------------------------------------------------------------------------------------------
 from datasets import load_dataset
 full_dataset = load_dataset("Goorm-AI-04/Drone_Doppler")
 test_dataset = full_dataset["test"]
@@ -39,7 +38,7 @@ eval_dataset = Dataset.from_dict(eval_dataset)
 class_set = set(train_dataset["type"])
 id2label = {id:label for id, label in enumerate(class_set)}
 label2id = {label:id for id, label in id2label.items()}
-
+--------------------------------------------------------------------------------------------------------------------------
 from sklearn.metrics import (accuracy_score,
                              precision_recall_fscore_support,
                              roc_auc_score)
@@ -93,16 +92,15 @@ def collate_fn(examples):
   ).float()
   labels = torch.tensor([example["label"] for example in examples])
   return {"x": pixel_values, "labels": labels}
-
+--------------------------------------------------------------------------------------------------------------------------
 import torch
 model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
-
+--------------------------------------------------------------------------------------------------------------------------
 from transformers import PreTrainedModel, PretrainedConfig
 
 class GoogLeNetConfig(PretrainedConfig):
   def __init__(self,**kwargs):
     super().__init__(**kwargs)
-
 
 class GoogLeNet(PreTrainedModel):
   def __init__(self, model, config):
@@ -116,16 +114,16 @@ class GoogLeNet(PreTrainedModel):
       loss = self.cross_entropy(logits, labels)
       return {"loss": loss, "logits":logits}
     return {"logits":logits}
-
+--------------------------------------------------------------------------------------------------------------------------
 def run(seed):
   if wandb.run is not None:
     wandb.finish()
 
   set_seed(seed)
-
+  
   import torch
   model = torch.hub.load('pytorch/vision:v0.10.0', 'alexnet', pretrained=True)
-
+  
   import torch.nn as nn
   model.fc = nn.Linear(1024,3)
 
@@ -179,6 +177,7 @@ def run(seed):
   trainer.train()
   return trainer, model
 
-  end_trainer, end_model = run(seed)
+end_trainer, end_model = run(seed)
+--------------------------------------------------------------------------------------------------------------------------
   wandb.finish()
   end_trainer.predict(test_dataset).metrics
