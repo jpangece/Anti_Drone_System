@@ -93,63 +93,63 @@ def collate_fn(examples):
 
 # Define a training function
 def run(seed):
-    if wandb.run is not None:
-        wandb.finish()
+  if wandb.run is not None:
+    wandb.finish()
     
-    set_seed(seed)
+  set_seed(seed)
 
-    # Load ResNet model
-    model = ResNetForImageClassification.from_pretrained("microsoft/resnet-101")
-    param_size = 0
-    for param in model.parameters():
-      param_size += param.nelement() * param.element_size()
-    buffer_size = 0
-    for buffer in model.buffers():
-      buffer_size += buffer.nelement() * buffer.element_size()
+  # Load ResNet model
+  model = ResNetForImageClassification.from_pretrained("microsoft/resnet-101")
+  param_size = 0
+  for param in model.parameters():
+    param_size += param.nelement() * param.element_size()
+  buffer_size = 0
+  for buffer in model.buffers():
+    buffer_size += buffer.nelement() * buffer.element_size()
 
-    size_all_mb = (param_size + buffer_size) / 1024**2
-    print('model size: {:.3f}MB'.format(size_all_mb))
+  size_all_mb = (param_size + buffer_size) / 1024**2
+  print('model size: {:.3f}MB'.format(size_all_mb))
 
-    model.classifier = nn.Sequential(
-        nn.Flatten(),
-        nn.Linear(2048, 16)
-    )
-    model.num_labels = 16
-    model.id2label = id2label
-    model.label2id = label2id
+  model.classifier = nn.Sequential(
+      nn.Flatten(),
+      nn.Linear(2048, 16)
+  )
+  model.num_labels = 16
+  model.id2label = id2label
+  model.label2id = label2id
 
-    # Define training arguments
-    training_args = TrainingArguments(
-        output_dir='./drive/MyDrive/RCS/ResNet/results',
-        num_train_epochs=3,
-        learning_rate=1e-2,
-        per_device_train_batch_size=128,
-        per_device_eval_batch_size=20,
-        weight_decay=0.01,
-        logging_dir='./drive/MyDrive/RCS/ResNet/logs',
-        logging_steps=4,
-        do_train=True,
-        do_eval=True,
-        evaluation_strategy="epoch",
-        gradient_accumulation_steps=1,
-        run_name="RCS_ResNet101",
-        seed=seed,
-        remove_unused_columns=False,
-        report_to="wandb",
-    )
+  # Define training arguments
+  training_args = TrainingArguments(
+      output_dir='./drive/MyDrive/RCS/ResNet/results',
+      num_train_epochs=3,
+      learning_rate=1e-2,
+      per_device_train_batch_size=128,
+      per_device_eval_batch_size=20,
+      weight_decay=0.01,
+      logging_dir='./drive/MyDrive/RCS/ResNet/logs',
+      logging_steps=4,
+      do_train=True,
+      do_eval=True,
+      evaluation_strategy="epoch",
+      gradient_accumulation_steps=1,
+      run_name="RCS_ResNet101",
+      seed=seed,
+      remove_unused_columns=False,
+      report_to="wandb",
+  )
 
-    # Initialize WandB
-    wandb.init(
-        project=f"RCS_ResNet101",
-        name=(
-            f"{datetime.now().strftime('%b-%d %H:%M')} "
-            f"lr:{training_args.learning_rate:1.0e} "
-            f"batch_size:{training_args.per_device_train_batch_size} "
-            f"epoch:{training_args.num_train_epochs}"
-        ),
-        config=training_args
-    )
-
+  # Initialize WandB
+  wandb.init(
+      project=f"RCS_ResNet101",
+      name=(
+          f"{datetime.now().strftime('%b-%d %H:%M')} "
+          f"lr:{training_args.learning_rate:1.0e} "
+          f"batch_size:{training_args.per_device_train_batch_size} "
+          f"epoch:{training_args.num_train_epochs}"
+      ),
+      config=training_args
+  )
+  
     # Define trainer
     trainer = Trainer(
         model=model,
