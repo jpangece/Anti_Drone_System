@@ -9,23 +9,21 @@ import csv
 drone_rcs_dataset = load_dataset("Goorm-AI-04/Drone_RCS_Measurement")
 
 F450_HH = drone_rcs_dataset["F450_HH"]
-
 F450_HH
 
 def append_dictionary(dictionary, element):
-  for key, value in element.items():
-    dictionary[key].append(value)
+    for key, value in element.items():
+        dictionary[key].append(value)
 
 group_in_frequency = {}
 
 for data in F450_HH:
-  frequency = data.pop("f")
-  if frequency not in group_in_frequency:
-    group_in_frequency[frequency] = {'theta': [], 'phi': [], 'RCS': []}
-  append_dictionary(group_in_frequency[frequency], data)
+    frequency = data.pop("f")
+    if frequency not in group_in_frequency:
+        group_in_frequency[frequency] = {'theta': [], 'phi': [], 'RCS': []}
+    append_dictionary(group_in_frequency[frequency], data)
 
 df = pd.DataFrame.from_dict(group_in_frequency)
-
 df
 
 """# TRANING"""
@@ -50,7 +48,11 @@ full_dataset = load_dataset("Goorm-AI-04/RCS_Image_Stratified_Train_Test")
 test_dataset = full_dataset["test"]
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"], test_size=0.1, stratify=full_dataset["train"]["drone_type"])
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"],
+    test_size=0.1,
+    stratify=full_dataset["train"]["drone_type"]
+)
 
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
@@ -60,7 +62,11 @@ drone_set = set(train_dataset["drone_type"])
 id2label = {id:label for id, label in enumerate(drone_set)}
 label2id = {label:id for id, label in id2label.items()}
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_recall_fscore_support,
+    roc_auc_score
+)
 
 def compute_metrics(pred):
     labels = pred.label_ids
@@ -88,8 +94,20 @@ feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-34")
 def collate_fn(examples):
   concat = lambda x : np.concatenate([x,x,x], axis=2)
   add_noise = lambda x: x + np.random.normal(0,np.sqrt(0.1),x.shape)
-  images = [floor(ceiling(add_noise(np.array(example["rcs_image"])))) for example in examples]
-  pixel_values = feature_extractor([concat(np.expand_dims(image,axis=2)) for image in images], do_rescale=False)
+  images = [
+      floor(
+          ceiling(
+              add_noise(
+                  np.array(example["rcs_image"])
+              )
+          )
+      )
+      for example in examples
+  ]
+  pixel_values = feature_extractor(
+      [concat(np.expand_dims(image, axis=2)) for image in images],
+      do_rescale=False
+  )
   pixel_values = torch.tensor(np.array(pixel_values["pixel_values"]))
   labels = torch.tensor([example["label"] for example in examples])
   return {"pixel_values": pixel_values, "labels": labels}
@@ -107,7 +125,11 @@ full_dataset = load_dataset("Goorm-AI-04/RCS_Image_Stratified_Train_Test")
 test_dataset = full_dataset["test"]
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"], test_size=0.1, stratify=full_dataset["train"]["drone_type"])
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"],
+    test_size=0.1,
+    stratify=full_dataset["train"]["drone_type"]
+)
 
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
@@ -116,7 +138,11 @@ eval_dataset = Dataset.from_dict(eval_dataset)
 # Calculate the number of features for ResNet-34
 num_features = 512
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_recall_fscore_support,
+    roc_auc_score
+)
 
 def compute_metrics(pred):
     labels = pred.label_ids
@@ -144,8 +170,14 @@ feature_extractor = AutoFeatureExtractor.from_pretrained("microsoft/resnet-34")
 def collate_fn(examples):
   concat = lambda x : np.concatenate([x,x,x], axis=2)
   add_noise = lambda x: x + np.random.normal(0,np.sqrt(0.1),x.shape)
-  images = [floor(ceiling(add_noise(np.array(example["rcs_image"])))) for example in examples]
-  pixel_values = feature_extractor([concat(np.expand_dims(image,axis=2)) for image in images], do_rescale=False)
+  images = [
+      floor(ceiling(add_noise(np.array(example["rcs_image"]))))
+      for example in examples
+  ]
+  pixel_values = feature_extractor(
+      [concat(np.expand_dims(image, axis=2)) for image in images],
+      do_rescale=False
+  )
   pixel_values = torch.tensor(np.array(pixel_values["pixel_values"]))
   labels = torch.tensor([example["label"] for example in examples])
   return {"pixel_values": pixel_values, "labels": labels}
@@ -153,7 +185,6 @@ def collate_fn(examples):
 def run(seed):
     if wandb.run is not None:
         wandb.finish()
-
     set_seed(seed)
 
     from transformers import ResNetForImageClassification, ResNetConfig
@@ -161,19 +192,21 @@ def run(seed):
     config.num_labels = 16
 
     # Add ignore_mismatched_sizes=True to handle the mismatched sizes
-    model = ResNetForImageClassification.from_pretrained("microsoft/resnet-34", config=config, ignore_mismatched_sizes=True)
+    model = ResNetForImageClassification.from_pretrained(
+        "microsoft/resnet-34",
+        config=config,
+        ignore_mismatched_sizes=True
+    )
     param_size = 0
     for param in model.parameters():
       param_size += param.nelement() * param.element_size()
     buffer_size = 0
     for buffer in model.buffers():
       buffer_size += buffer.nelement() * buffer.element_size()
-
     size_all_mb = (param_size + buffer_size) / 1024**2
     print('model size: {:.3f}MB'.format(size_all_mb))
 
     import torch.nn as nn
-
     # Create a new classifier layer
     classifier = nn.Sequential(
         nn.Flatten(),
@@ -209,17 +242,15 @@ def run(seed):
     wandb.init(
         project=f"RCS_ResNet34",
         name = (
-    f"{datetime.now().strftime('%b-%d %H:%M')} "
-    f"lr:{training_args.learning_rate:1.0e} "
-    f"batch_size:{training_args.per_device_train_batch_size} "
-    f"epoch:{training_args.num_train_epochs}"
-    )
-
+        f"{datetime.now().strftime('%b-%d %H:%M')} "
+        f"lr:{training_args.learning_rate:1.0e} "
+        f"batch_size:{training_args.per_device_train_batch_size} "
+        f"epoch:{training_args.num_train_epochs}"
+        )
         config=training_args
     )
 
     from transformers import Trainer
-
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -236,15 +267,12 @@ def run(seed):
 
 end_trainer, end_model, test_metrics = run(seed)
 wandb.finish()
-
 param_size = 0
 for param in model.parameters():
   param_size += param.nelement() * param.element_size()
 buffer_size = 0
 for buffer in model.buffers():
   buffer_size += buffer.nelement() * buffer.element_size()
-
 size_all_mb = (param_size + buffer_size) / 1024**2
 print('model size: {:.3f}MB'.format(size_all_mb))
-
 print(test_metrics)
