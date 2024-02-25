@@ -6,6 +6,7 @@
 from transformers import set_seed
 import torch
 import numpy as np
+
 seed = 42
 set_seed(seed)
 
@@ -52,6 +53,7 @@ train_dataset, eval_dataset = train_test_split(
     test_size=0.1,
     stratify=full_dataset["train"]["drone_type"]
 )
+
 drone_set = set(train_dataset["drone_type"])
 id2label = {id:label for id, label in enumerate(drone_set)}
 label2id = {label:id for id, label in id2label.items()}
@@ -127,7 +129,9 @@ train_dataset, eval_dataset = train_test_split(
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
 eval_dataset = Dataset.from_dict(eval_dataset)
+
 test_dataset = full_dataset["test"].map(flatten, num_proc=4)
+
 class_set = set(train_dataset["type"])
 id2label = {id:label for id, label in enumerate(class_set)}
 label2id = {label:id for id, label in id2label.items()}
@@ -150,11 +154,12 @@ svc = SVC(decision_function_shape='ovo')
 hgbc = HistGradientBoostingClassifier()
 rfc = RandomForestClassifier()
 
-models = {"LinearSVC":lsvc,
-          "SVC":svc,
-          "HistGradientBoostingClassifier":hgbc,
-          "RandomForestClassifier":rfc,
-          }
+models = {
+    "LinearSVC": lsvc,
+    "SVC": svc,
+    "HistGradientBoostingClassifier": hgbc,
+    "RandomForestClassifier": rfc,
+}
 
 from time import perf_counter
 for name, model in models.items():
@@ -214,6 +219,7 @@ def flatten(example):
   return example
 
 noise_dataset = load_dataset("Goorm-AI-04/Drone_Doppler_Noise")["train"].map(flatten, num_proc=4)
+
 Y_test = np.array(noise_dataset["label"])
 keys = (
     "image",
