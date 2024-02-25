@@ -176,13 +176,11 @@ def run(seed):
       compute_metrics=compute_metrics,
       data_collator=collate_fn
   )
-
   trainer.train()
-
   return trainer, model
 
-end_trainer, end_model = run(seed)
+  end_trainer, end_model = run(seed)
 
-wandb.finish()
+  wandb.finish()
 
-end_trainer.predict(test_dataset).metrics
+  end_trainer.predict(test_dataset).metrics
