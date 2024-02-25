@@ -180,7 +180,5 @@ def run(seed):
   return trainer, model
 
   end_trainer, end_model = run(seed)
-
   wandb.finish()
-
   end_trainer.predict(test_dataset).metrics
