@@ -6,9 +6,6 @@
 !wandb login
 !huggingface-cli login
 
-from google.colab import drive
-drive.mount('/content/drive')
-
 from transformers import set_seed
 import torch
 import numpy as np
