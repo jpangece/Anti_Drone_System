@@ -62,8 +62,8 @@ def collate_fn(examples):
   from torchvision import transforms
   from PIL import Image
   normalize = transforms.Compose([
-    transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+      transforms.ToTensor(),
+      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
   ])
   concat = lambda x : np.concatenate([x,x,x], axis=2)
   pixel_values = torch.tensor(
@@ -85,7 +85,6 @@ def collate_fn(examples):
         for example in examples
     ])
   ).float()
-
   labels = torch.tensor([example["label"] for example in examples])
   return {"x": pixel_values, "labels": labels}
 
@@ -116,16 +115,16 @@ def run(seed):
     wandb.finish()
 
   set_seed(seed)
-
+  
   import torch
   model = torch.hub.load('pytorch/vision:v0.10.0', 'googlenet', pretrained=True)
-
+  
   import torch.nn as nn
   model.fc = nn.Linear(1024,3)
-
+  
   config = GoogLeNetConfig()
   model = GoogLeNet(model, config)
-
+  
   from transformers import TrainingArguments
   training_args = TrainingArguments(
       output_dir='./drive/MyDrive/FMCW/GoogLeNet/results',  # output directory
@@ -150,16 +149,13 @@ def run(seed):
 
   from datetime import datetime
   wandb.init(
-      # set the wandb project where this run will be logged
       project=f"FMCW_GoogLeNet",
       name = (
-    f"{datetime.now().strftime('%b-%d %H:%M')} "
-    f"lr:{training_args.learning_rate:1.0e} "
-    f"batch_size:{training_args.per_device_train_batch_size} "
-    f"epoch:{training_args.num_train_epochs}"
-    )
-
-
+          f"{datetime.now().strftime('%b-%d %H:%M')} "
+          f"lr:{training_args.learning_rate:1.0e} "
+          f"batch_size:{training_args.per_device_train_batch_size} "
+          f"epoch:{training_args.num_train_epochs}"
+      )
       # track hyperparameters and run metadata
       config=training_args
   )
