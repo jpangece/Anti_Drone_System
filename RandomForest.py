@@ -1,3 +1,4 @@
+# Original code was written on Google Colab 
 !pip install transformers -q
 !pip install datasets -q
 !pip install accelerate -U -q
@@ -39,7 +40,12 @@ def extract_features(image):
 full_dataset = load_dataset("Goorm-AI-04/RCS_Image_Stratified_Train_Test")
 
 # Split the dataset into training and evaluation sets
-train_dataset, eval_dataset = train_test_split(full_dataset["train"], test_size=0.1, stratify=full_dataset["train"]["drone_type"])
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"], 
+    test_size=0.1, 
+    stratify=full_dataset["train"]["drone_type"]
+)
+
 
 # Extract features and labels from the training set
 X_train = [extract_features(image) for image in train_dataset["rcs_image"]]
