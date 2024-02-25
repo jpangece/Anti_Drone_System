@@ -78,6 +78,7 @@ class Collator:
         concat = lambda x : np.concatenate([x,x,x], axis=2)
         image = concat(np.expand_dims(image,axis=2))
         return image
+        
       from PIL import Image
       images = [
           add_dimension(
@@ -204,12 +205,12 @@ def run(model_name, seed, noise, **kwargs):
   wandb.init(
       # set the wandb project where this run will be logged
       project=f"Doppler_{model_name}",
-      name = (
-            f"{datetime.now().strftime('%b-%d %H:%M')} "
-            f"lr:{training_args.learning_rate:1.0e} "
-            f"batch_size:{training_args.per_device_train_batch_size} "
-            f"epoch:{training_args.num_train_epochs}"
-      )
+      name=(
+          f"{datetime.now().strftime('%b-%d %H:%M')} "
+          f"lr:{training_args.learning_rate:1.0e} "
+          f"batch_size:{training_args.per_device_train_batch_size} "
+          f"epoch:{training_args.num_train_epochs}"
+      ),
       config=training_args
   )
 
@@ -241,6 +242,7 @@ kwargs = {
     "warmup_steps":warmup_steps,
     "weight_decay":weight_decay
 }
+
 end_trainer, end_model = run(model_name, seed, noise, **kwargs)
 
 from transformers import TrainingArguments
@@ -265,6 +267,7 @@ from transformers import TrainingArguments
       report_to="wandb",
   )
 wandb.finish()
+
 end_trainer.predict(test_dataset).metrics
 
 from transformers import ConvNextImageProcessor
@@ -275,5 +278,6 @@ test_collator = Collator(
     noise=0.0001,
     image_size=None
 )
+
 end_trainer.data_collator = test_collator
 end_trainer.predict(test_dataset).metrics
