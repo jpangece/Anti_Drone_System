@@ -1,15 +1,23 @@
+# Original code was written on Google Colab 
+# Standard library imports
+import numpy as np
+
+# Third-party library imports
+import torch
+from transformers import set_seed
+import wandb
+
+# Install necessary packages
 !pip install transformers -q
 !pip install datasets -q
 !pip install accelerate -U -q
 !pip install wandb -q
+
+# Authenticate with Hugging Face and WandB
 !huggingface-cli whoami
 !wandb login
 !huggingface-cli login
 
-from transformers import set_seed
-import torch
-import numpy as np
-import wandb
 
 seed = 42
 set_seed(seed)
