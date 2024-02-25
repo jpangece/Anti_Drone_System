@@ -25,7 +25,11 @@ nasnet_dataset = load_dataset("Goorm-AI-04/RCS_Image_Stratified_Train_Test")
 test_dataset = nasnet_dataset["test"]
 
 # Split dataset into training and evaluation
-train_dataset, eval_dataset = train_test_split(nasnet_dataset["train"], test_size=0.1, stratify=nasnet_dataset["train"]["drone_type"])
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"], 
+    test_size=0.1, 
+    stratify=full_dataset["train"]["drone_type"]
+)
 
 # Convert datasets to Dataset objects
 train_dataset = Dataset.from_dict(train_dataset)
@@ -131,7 +135,6 @@ def run(seed):
     f"batch_size:{training_args.per_device_train_batch_size} "
     f"epoch:{training_args.num_train_epochs}"
     )
-
         config=training_args
     )
 
