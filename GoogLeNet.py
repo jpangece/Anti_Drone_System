@@ -150,12 +150,12 @@ def run(seed):
   from datetime import datetime
   wandb.init(
       project=f"FMCW_GoogLeNet",
-      name = (
+      name=(
           f"{datetime.now().strftime('%b-%d %H:%M')} "
           f"lr:{training_args.learning_rate:1.0e} "
           f"batch_size:{training_args.per_device_train_batch_size} "
           f"epoch:{training_args.num_train_epochs}"
-      )
+      ),
       # track hyperparameters and run metadata
       config=training_args
   )
