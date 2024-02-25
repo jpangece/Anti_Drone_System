@@ -46,7 +46,6 @@ train_dataset, eval_dataset = train_test_split(
     stratify=full_dataset["train"]["drone_type"]
 )
 
-
 # Extract features and labels from the training set
 X_train = [extract_features(image) for image in train_dataset["rcs_image"]]
 y_train = np.array(train_dataset["label"])
@@ -81,7 +80,13 @@ param_grid = {
 rf_classifier = RandomForestClassifier(random_state=seed)
 
 # Perform hyperparameter tuning using GridSearchCV
-grid_search = GridSearchCV(estimator=rf_classifier, param_grid=param_grid, cv=3, scoring='accuracy', n_jobs=-1)
+grid_search = GridSearchCV(
+    estimator=rf_classifier,
+    param_grid=param_grid,
+    cv=3,
+    scoring='accuracy',
+    n_jobs=-1
+)
 grid_search.fit(X_train, y_train)
 
 # Get the best hyperparameters from the grid search
