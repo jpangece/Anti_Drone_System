@@ -158,12 +158,12 @@ def run(seed):
   wandb.init(
       project=f"FMCW_AlexNet",
       name = (
-    f"{datetime.now().strftime('%b-%d %H:%M')} "
-    f"lr:{training_args.learning_rate:1.0e} "
-    f"batch_size:{training_args.per_device_train_batch_size} "
-    f"epoch:{training_args.num_train_epochs}"
-    )
-  config=training_args
+          f"{datetime.now().strftime('%b-%d %H:%M')} "
+          f"lr:{training_args.learning_rate:1.0e} "
+          f"batch_size:{training_args.per_device_train_batch_size} "
+          f"epoch:{training_args.num_train_epochs}"
+      )
+      config=training_args
   )
 
   from transformers import Trainer
