@@ -3,7 +3,6 @@
 !pip install accelerate -U -q
 !pip install wandb -q
 !wandb login
-# !huggingface-cli login
 !huggingface-cli whoami
 
 from transformers import set_seed
@@ -23,7 +22,12 @@ def add_dimension(example):
   return example
 
 from sklearn.model_selection import train_test_split
-train_dataset, eval_dataset = train_test_split(full_dataset["train"].map(add_dimension, num_proc=4), test_size=0.1, stratify=full_dataset["train"]["label"], random_state=seed)
+train_dataset, eval_dataset = train_test_split(
+    full_dataset["train"].map(add_dimension, num_proc=4),
+    test_size=0.1,
+    stratify=full_dataset["train"]["label"],
+    random_state=seed
+)
 
 from datasets import Dataset
 train_dataset = Dataset.from_dict(train_dataset)
@@ -35,7 +39,11 @@ class_set = set(train_dataset["type"])
 id2label = {id:label for id, label in enumerate(class_set)}
 label2id = {label:id for id, label in id2label.items()}
 
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_recall_fscore_support,
+    roc_auc_score
+)
 
 def compute_metrics(pred):
     labels = pred.label_ids
@@ -60,7 +68,10 @@ class Collator:
     images = [np.array(example["image"]) for example in examples]
     if self.noise is not None:
       norm = lambda x: x * (1.0/x.max())
-      images = [norm(image + np.random.normal(0,np.sqrt(self.noise),image.shape)) for image in images]
+      images = [
+          norm(image + np.random.normal(0, np.sqrt(self.noise), image.shape))
+          for image in images
+      ]
 
     if self.image_size is not None:
       def add_dimension(image):
@@ -68,7 +79,14 @@ class Collator:
         image = concat(np.expand_dims(image,axis=2))
         return image
       from PIL import Image
-      images = [add_dimension(np.array(Image.fromarray(image[:,:,0]).resize(self.image_size))) for image in images]
+      images = [
+          add_dimension(
+              np.array(
+                  Image.fromarray(image[:, :, 0]).resize(self.image_size)
+              )
+          )
+          for image in images
+      ]
 
     if self.processor is not None:
       if "resnet" in self.model_name.lower():
@@ -156,28 +174,30 @@ def run(model_name, seed, noise, **kwargs):
 
     from transformers import AutoImageProcessor
     processor = AutoImageProcessor.from_pretrained("Matthijs/mobilenet_v2_1.0_224")
-
     image_size = (224,224)
 
-  collator = Collator(processor=processor, model_name=model_name, noise=noise, image_size=image_size)
+  collator = Collator(
+     processor=processor,
+     model_name=model_name,
+     noise=noise,
+     image_size=image_size
+  )
 
   from transformers import TrainingArguments
   training_args = TrainingArguments(
       output_dir='./drive/MyDrive/RCS/ResNet/results',
       logging_dir='./drive/MyDrive/RCS/ResNet/logs',
       logging_steps=16,
-      per_device_eval_batch_size=64,
-      do_train=True,
-      do_eval=True,
+      per_device_eval_batch_size=64,  # batch size for evaluation
+      do_train=True,  # Perform training
+      do_eval=True,  # Perform evaluation
       evaluation_strategy="epoch",
-      gradient_accumulation_steps=1,
-      fp16=True,
+      gradient_accumulation_steps=1,  # total number of steps before back propagation
+      fp16=True,  # Use mixed precision
       run_name=f"Doppler_{model_name}",
       remove_unused_columns=False,
       report_to="wandb",
       **kwargs
-      # load_best_model_at_end=True,
-      # metric_for_best_model=metric_name,
   )
 
   from datetime import datetime
@@ -185,19 +205,15 @@ def run(model_name, seed, noise, **kwargs):
       # set the wandb project where this run will be logged
       project=f"Doppler_{model_name}",
       name = (
-    f"{datetime.now().strftime('%b-%d %H:%M')} "
-    f"lr:{training_args.learning_rate:1.0e} "
-    f"batch_size:{training_args.per_device_train_batch_size} "
-    f"epoch:{training_args.num_train_epochs}"
-    )
-
-
-      # track hyperparameters and run metadata
+            f"{datetime.now().strftime('%b-%d %H:%M')} "
+            f"lr:{training_args.learning_rate:1.0e} "
+            f"batch_size:{training_args.per_device_train_batch_size} "
+            f"epoch:{training_args.num_train_epochs}"
+      )
       config=training_args
   )
 
   from transformers import Trainer
-
   trainer = Trainer(
       model=model,
       args=training_args,
@@ -206,19 +222,17 @@ def run(model_name, seed, noise, **kwargs):
       compute_metrics=compute_metrics,
       data_collator=collator
   )
-
   trainer.train()
-
   return trainer, model
 
-model_name = "resnet" # @param {type:"string"}
-seed = 42 # @param {type:"integer"}
-noise = None # @param
-num_train_epochs = 4 # @param {type:"integer"}
-learning_rate = 1e-2 # @param
-per_device_train_batch_size = 128 # @param {type:"integer"}
-warmup_steps = 16 # @param {type:"integer"}
-weight_decay = 0.001 # @param {type:"number"}
+model_name = "resnet" # param {type:"string"}
+seed = 42 # param {type:"integer"}
+noise = None # param
+num_train_epochs = 4 # param {type:"integer"}
+learning_rate = 1e-2 # param
+per_device_train_batch_size = 128 # param {type:"integer"}
+warmup_steps = 16 # param {type:"integer"}
+weight_decay = 0.001 # param {type:"number"}
 
 kwargs = {
     "num_train_epochs":num_train_epochs,
@@ -227,7 +241,6 @@ kwargs = {
     "warmup_steps":warmup_steps,
     "weight_decay":weight_decay
 }
-
 end_trainer, end_model = run(model_name, seed, noise, **kwargs)
 
 from transformers import TrainingArguments
@@ -250,17 +263,17 @@ from transformers import TrainingArguments
       seed=seed,
       remove_unused_columns=False,
       report_to="wandb",
-      # load_best_model_at_end=True,
-      # metric_for_best_model=metric_name,
   )
-
 wandb.finish()
-
 end_trainer.predict(test_dataset).metrics
 
 from transformers import ConvNextImageProcessor
 processor = ConvNextImageProcessor.from_pretrained("microsoft/resnet-101")
-test_collator = Collator(processor=processor, model_name="ResNet101", noise=0.0001, image_size=None)
-
+test_collator = Collator(
+    processor=processor,
+    model_name="ResNet101",
+    noise=0.0001,
+    image_size=None
+)
 end_trainer.data_collator = test_collator
 end_trainer.predict(test_dataset).metrics
