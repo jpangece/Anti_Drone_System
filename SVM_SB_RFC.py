@@ -179,7 +179,8 @@ for name, model in models.items():
   if name == "BayesianRidge":
     predictions = predictions.round()
   results[name] = compute_metrics((predictions,Y_val))
-  print(f"results of {name}: {results[name]} / time for inference: {end-start}")
+  print(f"results of {name}: {results[name]} / "
+      f"time for inference: {end-start}")
 
 best_models = {}
 best_models["LinearSVC"] = models["LinearSVC"]
