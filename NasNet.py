@@ -94,7 +94,7 @@ def collate_fn(examples):
 # Define a training function
 def run(seed):
   if wandb.run is not None:
-    wandb.finish()
+      wandb.finish()
     
   set_seed(seed)
 
